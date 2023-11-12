@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import styles from './WheelPicker.styles';
 import WheelPickerItem from './WheelPickerItem';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
 
 interface Props {
   selectedIndex: number;
@@ -73,8 +73,6 @@ const WheelPicker: React.FC<Props> = ({
     [visibleRest, scrollY, itemHeight],
   );
 
-  const panGesture = Gesture.Pan().onChange((e) => console.log(e));
-
   const handleMomentumScrollEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
   ) => {
@@ -105,6 +103,15 @@ const WheelPicker: React.FC<Props> = ({
     }
   }, [selectedIndex, options]);
 
+  const handleScroll = () => {
+    console.log('alksjfdalskdjf');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    return Animated.event(
+      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      { useNativeDriver: true },
+    );
+  };
+
   /**
    * If selectedIndex is changed from outside (not via onChange) we need to scroll to the specified index.
    * This ensures that what the user sees as selected in the picker always corresponds to the value state.
@@ -131,44 +138,40 @@ const WheelPicker: React.FC<Props> = ({
           },
         ]}
       />
-      <GestureDetector gesture={panGesture}>
-        <Animated.FlatList<string | null>
-          {...flatListProps}
-          ref={flatListRef}
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true },
-          )}
-          onMomentumScrollEnd={handleMomentumScrollEnd}
-          snapToOffsets={offsets}
-          decelerationRate={decelerationRate}
-          initialScrollIndex={selectedIndex}
-          getItemLayout={(data, index) => ({
-            length: itemHeight,
-            offset: itemHeight * index,
-            index,
-          })}
-          data={paddedOptions}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item: option, index }) => (
-            <WheelPickerItem
-              key={`option-${index}`}
-              index={index}
-              option={option}
-              style={itemStyle}
-              textStyle={itemTextStyle}
-              height={itemHeight}
-              currentScrollIndex={currentScrollIndex}
-              scaleFunction={scaleFunction}
-              rotationFunction={rotationFunction}
-              opacityFunction={opacityFunction}
-              visibleRest={visibleRest}
-            />
-          )}
-        />
-      </GestureDetector>
+
+      <Animated.FlatList<string | null>
+        {...flatListProps}
+        ref={flatListRef}
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        snapToOffsets={offsets}
+        decelerationRate={decelerationRate}
+        initialScrollIndex={selectedIndex}
+        getItemLayout={(data, index) => ({
+          length: itemHeight,
+          offset: itemHeight * index,
+          index,
+        })}
+        data={paddedOptions}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item: option, index }) => (
+          <WheelPickerItem
+            key={`option-${index}`}
+            index={index}
+            option={option}
+            style={itemStyle}
+            textStyle={itemTextStyle}
+            height={itemHeight}
+            currentScrollIndex={currentScrollIndex}
+            scaleFunction={scaleFunction}
+            rotationFunction={rotationFunction}
+            opacityFunction={opacityFunction}
+            visibleRest={visibleRest}
+          />
+        )}
+      />
     </View>
   );
 };
