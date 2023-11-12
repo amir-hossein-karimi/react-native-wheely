@@ -103,15 +103,6 @@ const WheelPicker: React.FC<Props> = ({
     }
   }, [selectedIndex, options]);
 
-  const handleScroll = () => {
-    console.log('alksjfdalskdjf');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    return Animated.event(
-      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-      { useNativeDriver: true },
-    );
-  };
-
   /**
    * If selectedIndex is changed from outside (not via onChange) we need to scroll to the specified index.
    * This ensures that what the user sees as selected in the picker always corresponds to the value state.
@@ -144,7 +135,16 @@ const WheelPicker: React.FC<Props> = ({
         ref={flatListRef}
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        onScroll={handleScroll}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          {
+            useNativeDriver: true,
+            listener: (e: any) => {
+              console.log(e.nativeEvent.contentOffset.y);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            },
+          },
+        )}
         onMomentumScrollEnd={handleMomentumScrollEnd}
         snapToOffsets={offsets}
         decelerationRate={decelerationRate}
