@@ -140,7 +140,6 @@ const WheelPicker: React.FC<Props> = ({
           {
             useNativeDriver: true,
             listener: (e: any) => {
-              console.log(e.nativeEvent.contentOffset.y);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             },
           },
